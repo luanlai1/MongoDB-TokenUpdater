@@ -36,7 +36,7 @@ git clone https://github.com/你的用户名/你的仓库名.git
 cd 你的仓库名
 npm install express mongoose
 
-打开 `app.js`（或 `editToken.js`），找到 `MONGO_URI` 变量，将里面的英文占位符替换为你自己的 MongoDB 连接信息：
+打开 `UpdateDatabaseInfo.js`，找到 `MONGO_URI` 变量，将里面的英文占位符替换为你自己的 MongoDB 连接信息：
 | 占位符 | 含义 | 举例 |
 - USERNAME：数据库用户名|admin
 - PASSWORD：数据库密码|abc123456
