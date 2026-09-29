@@ -32,82 +32,82 @@ app.get('/', (req, res) => {
     <!DOCTYPE html>
     <html lang="zh-CN">
     <head>
-        <meta charset="UTF-8">
-        <title>每日参数更新工具</title>
-        <style>
-            body { font-family: sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; background: #f4f6f9; }
-            .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-            select, textarea, input[type=text] { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;}
-            textarea { height: 100px; resize: vertical;}
-            button { background: #007bff; color: white; border: none; padding: 12px 20px; margin-top: 20px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
-            button:hover { background: #0056b3; }
-            .label-tip { color: #888; font-size: 12px; margin-left: 5px; }
-            .status-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eef0f3; font-size: 14px; }
-            .status-item:last-child { border-bottom: none; }
-            .status-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-            .dot-ok { background-color: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,0.15); }
-            .dot-expired { background-color: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,0.15); }
-            .status-time { color: #999; font-size: 12px; }
-            hr { border: none; border-top: 1px solid #eef0f3; margin: 18px 0; }
-        </style>
+      <meta charset="UTF-8">
+      <title>每日参数更新工具</title>
+      <style>
+          body { font-family: sans-serif; padding: 30px; max-width: 800px; margin: 0 auto; background: #f4f6f9; }
+          .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+          select, textarea, input[type=text] { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px;}
+          textarea { height: 100px; resize: vertical;}
+          button { background: #007bff; color: white; border: none; padding: 12px 20px; margin-top: 20px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
+          button:hover { background: #0056b3; }
+          .label-tip { color: #888; font-size: 12px; margin-left: 5px; }
+          .status-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eef0f3; font-size: 14px; }
+          .status-item:last-child { border-bottom: none; }
+          .status-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+          .dot-ok { background-color: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,0.15); }
+          .dot-expired { background-color: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,0.15); }
+          .status-time { color: #999; font-size: 12px; }
+          hr { border: none; border-top: 1px solid #eef0f3; margin: 18px 0; }
+      </style>
     </head>
     <body>
-        <div class="box">
-            <h2>🔧 更新 YourCollection 数据</h2>
-            <h3>需更新的应用当前状态</h3>
-            <div id="statusList" style="margin-top:10px; font-size:14px;">加载中...</div>
-            <hr>
-            <p class="warnning">⚠️注意：当前操作会直接更新数据库，请确认所填信息无误后再提交。</p>
-            <form action="/update" method="POST">
-                <label>选择要更新的应用：</label>
-                <select name="appName">
-                    <option value="DataApp1">DataApp1</option>
-                    <option value="DataApp2">DataApp2</option>
-                    <option value="DataApp3">DataApp3</option>
-                </select>
-                
-                <label style="margin-top:15px; display:block;">最新的 accessToken / Cookie：<span class="label-tip">(选填，不填不会修改)</span></label>
-                <textarea name="newCookie" placeholder="粘贴 F12 抓包得到的完整 Cookie 字符串..."></textarea>
-                
-                <label style="margin-top:15px; display:block;">最新的 appSecret：<span class="label-tip">(选填，不填不会修改)</span></label>
-                <input type="text" name="newAppSecret" placeholder="如果需要更新 appSecret，请粘贴到这里...">
-                
-                <button type="submit">更新至数据库</button>
-            </form>
-        </div>
-        <script>
-            async function loadStatus() {
-                try {
-                    const resp = await fetch('/appToken/status');
-                    const result = await resp.json();
-                    const container = document.getElementById('statusList');
+      <div class="box">
+          <h2>🔧 更新 YourCollection 数据</h2>
+          <h3>需更新的应用当前状态</h3>
+          <div id="statusList" style="margin-top:10px; font-size:14px;">加载中...</div>
+          <hr>
+          <p class="warnning">⚠️注意：当前操作会直接更新数据库，请确认所填信息无误后再提交。</p>
+          <form action="/update" method="POST">
+              <label>选择要更新的应用：</label>
+              <select name="appName">
+                  <option value="DataApp1">DataApp1</option>
+                  <option value="DataApp2">DataApp2</option>
+                  <option value="DataApp3">DataApp3</option>
+              </select>
+              
+              <label style="margin-top:15px; display:block;">最新的 accessToken / Cookie：<span class="label-tip">(选填，不填不会修改)</span></label>
+              <textarea name="newCookie" placeholder="粘贴 F12 抓包得到的完整 Cookie 字符串..."></textarea>
+              
+              <label style="margin-top:15px; display:block;">最新的 appSecret：<span class="label-tip">(选填，不填不会修改)</span></label>
+              <input type="text" name="newAppSecret" placeholder="如果需要更新 appSecret，请粘贴到这里...">
+              
+              <button type="submit">更新至数据库</button>
+          </form>
+      </div>
+      <script>
+          async function loadStatus() {
+              try {
+                  const resp = await fetch('/appToken/status');
+                  const result = await resp.json();
+                  const container = document.getElementById('statusList');
 
-                    if (result.code !== 0 || !result.data || result.data.length === 0) {
-                        container.innerHTML = '<p style="color:#888;">暂无数据</p>';
-                        return;
-                    }
+                  if (result.code !== 0 || !result.data || result.data.length === 0) {
+                      container.innerHTML = '<p style="color:#888;">暂无数据</p>';
+                      return;
+                  }
 
-                    let html = '';
-                    result.data.forEach(function (item) {
-                        var dotClass = item.status === 'ok' ? 'dot-ok' : 'dot-expired';
-                        var text = item.status === 'ok' ? '有效' : '失效';
-                        var timeText = item.accessTime ? new Date(item.accessTime).toLocaleString('zh-CN') : '从未更新';
+                  let html = '';
+                  result.data.forEach(function (item) {
+                      var dotClass = item.status === 'ok' ? 'dot-ok' : 'dot-expired';
+                      var text = item.status === 'ok' ? '有效' : '失效';
+                      var timeText = item.accessTime ? new Date(item.accessTime).toLocaleString('zh-CN') : '从未更新';
 
-                        html += '<div class="status-item">'
-                            +   '<div><b>' + item.name + '</b></div>'
-                            +   '<div><span class="status-dot ' + dotClass + '"></span>' + text + '</div>'
-                            +   '<div class="status-time">' + timeText + '</div>'
-                            +   '</div>';
-                    });
-                    container.innerHTML = html;
-                } catch (err) {
-                    document.getElementById('statusList').innerHTML = '<p style="color:red;">状态加载失败</p>';
-                }
-            }
+                      html += '<div class="status-item">'
+                          +   '<div><b>' + item.name + '</b></div>'
+                          +   '<div><span class="status-dot ' + dotClass + '"></span>' + text + '</div>'
+                          +   '<div class="status-time">' + timeText + '</div>'
+                          +   '</div>';
+                  });
+                  container.innerHTML = html;
+              } catch (err) {
+                  document.getElementById('statusList').innerHTML = '<p style="color:red;">状态加载失败</p>';
+              }
+          }
 
-            loadStatus();
-            setInterval(loadStatus, 60000);
-        </script>
+          loadStatus();
+          setInterval(loadStatus, 60000);
+      </script>
     </body>
     </html>
   `);
@@ -131,6 +131,7 @@ app.get('/appToken/status', async (req, res) => {
         const tokenValid = !!(doc.accessToken && doc.accessToken.trim());
         let secretValid = true;
 
+        // 只有在NEEDS_SECRET中的应用才判断appSecret
         if (NEEDS_SECRET.includes(appName)) {
           secretValid = !!(doc.appSecret && doc.appSecret.trim());
         }
