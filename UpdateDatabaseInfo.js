@@ -20,6 +20,11 @@ const applicationSchema = new mongoose.Schema({
 
 const YourCollection = mongoose.model('YourCollection', applicationSchema);
 
+// 这是一个白名单，为了防止误更新，只要appName不在白名单，请求会被打回
+// ALLOWED_APPS表示哪些应用需要更新，NEEDS_SECRET表示哪些应用需要appSecret和accessToken都更新才有用
+const ALLOWED_APPS = ['DataApp1', 'DataApp2', 'DataApp3'];
+const NEEDS_SECRET = ['DataApp2', 'DataApp3'];
+
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
@@ -37,11 +42,21 @@ app.get('/', (req, res) => {
             button { background: #007bff; color: white; border: none; padding: 12px 20px; margin-top: 20px; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
             button:hover { background: #0056b3; }
             .label-tip { color: #888; font-size: 12px; margin-left: 5px; }
+            .status-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eef0f3; font-size: 14px; }
+            .status-item:last-child { border-bottom: none; }
+            .status-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+            .dot-ok { background-color: #28a745; box-shadow: 0 0 0 3px rgba(40,167,69,0.15); }
+            .dot-expired { background-color: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,0.15); }
+            .status-time { color: #999; font-size: 12px; }
+            hr { border: none; border-top: 1px solid #eef0f3; margin: 18px 0; }
         </style>
     </head>
     <body>
         <div class="box">
             <h2>🔧 更新 YourCollection 数据</h2>
+            <h3>需更新的应用当前状态</h3>
+            <div id="statusList" style="margin-top:10px; font-size:14px;">加载中...</div>
+            <hr>
             <p class="warnning">⚠️注意：当前操作会直接更新数据库，请确认所填信息无误后再提交。</p>
             <form action="/update" method="POST">
                 <label>选择要更新的应用：</label>
@@ -60,16 +75,88 @@ app.get('/', (req, res) => {
                 <button type="submit">更新至数据库</button>
             </form>
         </div>
+        <script>
+            async function loadStatus() {
+                try {
+                    const resp = await fetch('/appToken/status');
+                    const result = await resp.json();
+                    const container = document.getElementById('statusList');
+
+                    if (result.code !== 0 || !result.data || result.data.length === 0) {
+                        container.innerHTML = '<p style="color:#888;">暂无数据</p>';
+                        return;
+                    }
+
+                    let html = '';
+                    result.data.forEach(function (item) {
+                        var dotClass = item.status === 'ok' ? 'dot-ok' : 'dot-expired';
+                        var text = item.status === 'ok' ? '有效' : '失效';
+                        var timeText = item.accessTime ? new Date(item.accessTime).toLocaleString('zh-CN') : '从未更新';
+
+                        html += '<div class="status-item">'
+                            +   '<div><b>' + item.name + '</b></div>'
+                            +   '<div><span class="status-dot ' + dotClass + '"></span>' + text + '</div>'
+                            +   '<div class="status-time">' + timeText + '</div>'
+                            +   '</div>';
+                    });
+                    container.innerHTML = html;
+                } catch (err) {
+                    document.getElementById('statusList').innerHTML = '<p style="color:red;">状态加载失败</p>';
+                }
+            }
+
+            loadStatus();
+            setInterval(loadStatus, 60000);
+        </script>
     </body>
     </html>
   `);
 });
 
+// 状态接口
+app.get('/appToken/status', async (req, res) => {
+  try {
+    const list = [];
+
+    for (const appName of ALLOWED_APPS) {
+      const doc = await YourCollection.findOne(
+        { name: appName },
+        'name accessToken appSecret accessTime'
+      );
+
+      let valid = false;
+      let accessTime = null;
+
+      if (doc) {
+        const tokenValid = !!(doc.accessToken && doc.accessToken.trim());
+        let secretValid = true;
+
+        if (NEEDS_SECRET.includes(appName)) {
+          secretValid = !!(doc.appSecret && doc.appSecret.trim());
+        }
+
+        valid = tokenValid && secretValid;
+        accessTime = doc.accessTime;
+      }
+
+      list.push({
+        name: appName,
+        status: valid ? 'ok' : 'expired',
+        accessTime: accessTime
+      });
+    }
+
+    res.json({ code: 0, data: list });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ code: 500, message: 'status error' });
+  }
+});
+
+// 更新接口
 app.post('/update', async (req, res) => {
   const { appName, newCookie, newAppSecret } = req.body;
   
-// 这是一个白名单
-  const ALLOWED_APPS = ['DataApp1','DataApp2','DataApp3'];
   if (!ALLOWED_APPS.includes(appName)) {
     return res.send(`
       <body style="font-family:sans-serif; padding:50px; text-align:center; background:#f4f6f9;">
